@@ -39,8 +39,8 @@ try:
 except ImportError:
     print("- no osgeo module for coordinate transformation found, trying to load pyproj module instead ...")
     try:
-        import pyproj
-        arcpyModule = True
+        from pyproj import Proj, transform
+        pyprojModule = True
     except ImportError:
         print("- no pyproj module for coordinate transformation found, trying to load ArcPy module instead ...")
         try:
@@ -77,7 +77,7 @@ if args.output_format == 'osm':
     args.compatibility_mode = False
 
 # the target EPSG is set according to the argument
-if not arcpyModule:
+if osgeoModule:
     # for OsGeo
     targetRef = osr.SpatialReference()
     targetRef.ImportFromEPSG(args.epsg)
@@ -93,7 +93,7 @@ if not arcpyModule:
     centralTransform = osr.CoordinateTransformation(centerRef, targetRef)
     eastTransfrom = osr.CoordinateTransformation(eastRef, targetRef)
 
-else:
+if arcpyModule:
     # for ArcPy
     arcTargetRef = arcpy.SpatialReference(args.epsg)
 
@@ -426,7 +426,7 @@ def reproject(sourceCRS, point):
     """This function reprojects an array of coordinates (a point) to the desired CRS
     depending on their original CRS given by the parameter sourceCRS"""
 
-    if not arcpyModule:
+    if osgeoModule:
         # if using OsGeo
         #point = ogr.CreateGeometryFromWkt("POINT (" + str(point[0]) + " " + str(point[1]) + ")")
         point = ogr.CreateGeometryFromWkt("POINT ({} {})".format(point[0], point[1]))
@@ -445,10 +445,13 @@ def reproject(sourceCRS, point):
     
     elif pyprojModule:
         # use pyproj
-        print("coordinate transformation with pyproj is not yet implemented")
-        quit()
+        inProj = Proj(init='epsg:' + sourceCRS)
+        outProj = Proj(init='epsg:' + str(args.epsg))
+        x1, y1 = point[0], point[1]
+        x2, y2 = transform(inProj, outProj, x1, y1)
+        transformedPoint = [x2, y2]
         
-    else:
+    elif arcpyModule:
         # if using ArcPy
         point = [float(x) for x in point]
         arcPoint = arcpy.Point(point[0],point[1])
@@ -469,6 +472,10 @@ def reproject(sourceCRS, point):
         del(arcPointTargetGeo)
         del(arcTargetPoint)
         del(arcPoint)
+
+    else:
+        print("No reprojection library found. Quitting.")
+        quit()
 
     return [round(float(p), 6) for p in transformedPoint]
         
