@@ -266,7 +266,7 @@ class OsmWriter():
         self._max_lon = None
 
     def _get_addr_date(self):
-        z = zipfile.ZipFile('Adresse_Relationale_Tabellen-Stichtagsdaten.zip', 'r')
+        z = zipfile.ZipFile('Adresse-Relationale_Tabellen_Stichtagsdaten.zip', 'r')
         for f in z.infolist():
             if f.filename == 'ADRESSE.csv':
                 return "%d-%02d-%02d" % f.date_time[:3]
@@ -409,11 +409,12 @@ class ProgressBar():
 def download_data():
     """This function downloads the address data from BEV and displays its terms
     of usage"""
+    print("function downloads the address data from BEV\n");
 
     if not requestsModule:
         print("source data missing and download is deactivated")
         quit()
-    addressdataUrl = "http://www.bev.gv.at/pls/portal/docs/PAGE/BEV_PORTAL_CONTENT_ALLGEMEIN/0200_PRODUKTE/UNENTGELTLICHE_PRODUKTE_DES_BEV/Adresse_Relationale_Tabellen-Stichtagsdaten.zip"
+    addressdataUrl = "https://www.bev.gv.at/pls/portal/docs/PAGE/BEV_PORTAL_CONTENT_ALLGEMEIN/0200_PRODUKTE/UNENTGELTLICHE_PRODUKTE_DES_BEV/Adresse-Relationale_Tabellen_Stichtagsdaten.zip";
     response = requests.get(addressdataUrl, stream=True)
     with open(addressdataUrl.split('/')[-1], 'wb') as handle, ProgressBar("downloading address data from BEV") as pb:
         for i, data in enumerate(response.iter_content(chunk_size=1000000)):
@@ -520,10 +521,10 @@ def preparations():
     csv_files = ["STRASSE.csv", "GEMEINDE.csv", "ADRESSE.csv", "GEBAEUDE.csv", "ORTSCHAFT.csv"]
     if not all(os.path.isfile(csv) for csv in csv_files):
         # ckeck if the packed version exists
-        if not os.path.isfile('Adresse_Relationale_Tabellen-Stichtagsdaten.zip'):
+        if not os.path.isfile('Adresse-Relationale_Tabellen_Stichtagsdaten.zip'):
             # if not, download it
             download_data()
-        with zipfile.ZipFile('Adresse_Relationale_Tabellen-Stichtagsdaten.zip', 'r') as myzip:
+        with zipfile.ZipFile('Adresse-Relationale_Tabellen_Stichtagsdaten.zip', 'r') as myzip:
             for csv in csv_files:
                 print("extracting %s" % csv)
                 myzip.extract(csv)

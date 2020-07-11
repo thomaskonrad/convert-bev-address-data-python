@@ -5,6 +5,10 @@ The idea for this script is shamelessly copied from https://github.com/BergWerkG
 The original script only runs on Windows systems. This one performs the same task as the original, but relies on Python.
 The gdal Python-Module or ArcPy (much, much slower!) needs to be installed to perform reprojection.
 
+## Required libraries
+
+On Debian based systems you need to install `python3-gdal` library for this script to run.
+
 ## Usage
 
 The main difference to the original is that you do not need to specify an input file name. ~~Just execute the script from within the unzipped data from the BEV.~~ The newest version of this script attempts to download the data directly. Of course, you can just put the *.zip file (or its extracted content) in the same directory as the script to avoid an automatic download.
